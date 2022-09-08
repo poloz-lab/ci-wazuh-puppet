@@ -107,13 +107,22 @@ test_keystore_dashboard()
 	if [ "${suffixe_manifests}" == "1" ]
 	then
 		afficher_separateur_test "Vérification de la suppression du keystore sur le dashboard"
-		lxc-attach -n 'wazuh-monolithe-0' -- test -f '/usr/share/wazuh-dashboard/config/opensearch_dashboards.keystore'
-		if [ "$?" -eq "0" ]
-		then
-			echo "Le keystore n'a pas été supprimé"
-			exit 4
-		fi
-		echo "Le keystore a été supprimé"
+		for conteneur in "${conteneurs[@]}"
+		do
+			# Test si le dashboard est présent sur le conteneur
+			lxc-attach -n "${conteneur}" -- dpkg --list | grep -o 'wazuh-dashboard' > '/dev/null'
+			if [ "$?" -eq "0" ]
+			then
+				# Test de l'absence du keystore
+				lxc-attach -n "${conteneur}" -- test -f '/usr/share/wazuh-dashboard/config/opensearch_dashboards.keystore'
+				if [ "$?" -eq "0" ]
+				then
+					echo "Le keystore n'a pas été supprimé sur ${conteneur}"
+					exit 4
+				fi
+				echo "Le keystore a été supprimé sur ${conteneur}"
+			fi
+		done
 	fi
 
 	return 0
