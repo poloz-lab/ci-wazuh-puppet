@@ -71,19 +71,7 @@ procedure_test()
 
 	# Tests
 	test_idempotence
-
-	# En fonction du manifest, vérifier si le keystore du dashboard est supprimé
-	if [ "${suffixe_manifests}" == "1" ]
-	then
-		afficher_separateur_test "Vérification de la suppression du keystore sur le dashboard"
-		lxc-attach -n 'wazuh-monolithe-0' -- test -f '/usr/share/wazuh-dashboard/config/opensearch_dashboards.keystore'
-		if [ "$?" -eq "0" ]
-		then
-			echo "Le keystore n'a pas été supprimé"
-			exit 4
-		fi
-		echo "Le keystore a été supprimé"
-	fi
+	test_keystore_dashboard
 
 	return 0
 }
@@ -108,6 +96,24 @@ test_idempotence()
 		exit 11
 	else
 		echo "Idempotence respectée"
+	fi
+
+	return 0
+}
+
+# Vérification de la présence/absence du keystore sur le dashboard
+test_keystore_dashboard()
+{
+	if [ "${suffixe_manifests}" == "1" ]
+	then
+		afficher_separateur_test "Vérification de la suppression du keystore sur le dashboard"
+		lxc-attach -n 'wazuh-monolithe-0' -- test -f '/usr/share/wazuh-dashboard/config/opensearch_dashboards.keystore'
+		if [ "$?" -eq "0" ]
+		then
+			echo "Le keystore n'a pas été supprimé"
+			exit 4
+		fi
+		echo "Le keystore a été supprimé"
 	fi
 
 	return 0
