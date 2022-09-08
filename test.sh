@@ -69,8 +69,30 @@ procedure_test()
 	# Passage de Puppet
 	passage_puppet
 
-	# Vérification de l'idempotence
+	# Tests
+	test_idempotence
+
+	# En fonction du manifest, vérifier si le keystore du dashboard est supprimé
+	if [ "${suffixe_manifests}" == "1" ]
+	then
+		afficher_separateur_test "Vérification de la suppression du keystore sur le dashboard"
+		lxc-attach -n 'wazuh-monolithe-0' -- test -f '/usr/share/wazuh-dashboard/config/opensearch_dashboards.keystore'
+		if [ "$?" -eq "0" ]
+		then
+			echo "Le keystore n'a pas été supprimé"
+			exit 4
+		fi
+		echo "Le keystore a été supprimé"
+	fi
+
+	return 0
+}
+
+# Vérification de l'idempotence
+test_idempotence()
+{
 	afficher_separateur_test "Vérification de l'idempotence"
+
 	ancien_sortie_flux="${sortie_flux}"
 	sortie_flux="/dev/stdout"
 	sortie=`passage_puppet`
@@ -86,19 +108,6 @@ procedure_test()
 		exit 11
 	else
 		echo "Idempotence respectée"
-	fi
-
-	# En fonction du manifest, vérifier si le keystore du dashboard est supprimé
-	if [ "${suffixe_manifests}" == "1" ]
-	then
-		afficher_separateur_test "Vérification de la suppression du keystore sur le dashboard"
-		lxc-attach -n 'wazuh-monolithe-0' -- test -f '/usr/share/wazuh-dashboard/config/opensearch_dashboards.keystore'
-		if [ "$?" -eq "0" ]
-		then
-			echo "Le keystore n'a pas été supprimé"
-			exit 4
-		fi
-		echo "Le keystore a été supprimé"
 	fi
 
 	return 0
