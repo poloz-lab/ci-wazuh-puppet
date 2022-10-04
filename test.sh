@@ -109,9 +109,9 @@ test_keystore_dashboard()
 	if [ "${suffixe_manifests}" == "1" ]
 	then
 		afficher_separateur_test "Vérification de la suppression du keystore sur le dashboard"
+		# Vérification à faire uniquement sur un conteneur qui a le Wazuh Dashboard
 		for conteneur in "${conteneurs[@]}"
 		do
-			# Test si le dashboard est présent sur le conteneur
 			lxc-attach -n "${conteneur}" -- dpkg --list | grep -o 'wazuh-dashboard' > '/dev/null'
 			if [ "$?" -eq "0" ]
 			then
