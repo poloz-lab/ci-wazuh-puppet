@@ -119,7 +119,7 @@ test_keystore_dashboard()
 				lxc-attach -n "${conteneur}" -- test -f '/usr/share/wazuh-dashboard/config/opensearch_dashboards.keystore'
 				if [ "$?" -eq "0" ]
 				then
-					echo "Le keystore n'a pas été supprimé sur ${conteneur}"
+					echo "Le keystore n'a pas été supprimé sur ${conteneur}" >&2
 					exit 4
 				fi
 				echo "Le keystore a été supprimé sur ${conteneur}"
