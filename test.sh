@@ -5,6 +5,7 @@
 # 2 : Conteneur non créé
 # 3 : Conteneur non démarré
 # 4 : Keystore non supprimé sur le dashboard
+# 5 : Version du module filebeat incorrecte
 
 # FONCTIONS
 
@@ -72,6 +73,7 @@ procedure_test()
 	# Tests
 	test_idempotence
 	test_keystore_dashboard
+	test_version_module_filebeat
 
 	return 0
 }
@@ -128,6 +130,35 @@ test_keystore_dashboard()
 	return 0
 }
 
+# Vérification de la version du module Filebeat
+test_version_module_filebeat()
+{
+	afficher_separateur_test "Vérification de la version du module filebeat"
+	# Vérification à faire uniquement sur un conteneur qui a Filebeat
+	for conteneur in "${conteneurs[@]}"
+	do
+		lxc-attach -n "${conteneur}" -- dpkg --list | grep -o 'filebeat' > '/dev/null'
+		if [ "$?" -eq "0" ]
+		then
+			if [ "${suffixe_manifests}" == "2" ]
+			then
+				# La version du module Filebeat doit être 0.1 dans le cas du manifest 2
+				lxc-attach -n "${conteneur}" -- test -d '/opt/filebeat_wazuh_modules/wazuh-filebeat-0.1.tar.gz/wazuh'
+			else
+				# La version du module Filebeat doit être 0.2 dans les autres cas
+				lxc-attach -n "${conteneur}" -- test -d '/opt/filebeat_wazuh_modules/wazuh-filebeat-0.2.tar.gz/wazuh'
+			fi
+			if [ "$?" -eq "0" ]
+			then
+				echo "La version du module filebeat est correcte sur ${conteneur}"
+			else
+				echo "La version du module filebeat est incorrecte sur ${conteneur}" >&2
+				exit 5
+			fi
+		fi
+	done
+}
+
 # DÉFINITION DES VARIABLES GLOBALES
 
 # Mode silencieux
@@ -159,6 +190,18 @@ procedure_test && echo -e "\nSituation réussie"
 afficher_separateur "Situation 2 : Suppression du keystore sur le dashboard"
 
 suffixe_manifests="1"
+procedure_test && echo -e "\nSituation réussie"
+
+# Situation 3, mise à jour du module Filebeat
+afficher_separateur "Situation 3 : Mise à jour du module Filebeat"
+
+creation_conteneurs
+
+afficher_separateur_test "Avant mise à jour"
+suffixe_manifests="2"
+procedure_test
+afficher_separateur_test "Mise à jour vers version actuelle"
+suffixe_manifests=""
 procedure_test && echo -e "\nSituation réussie"
 
 # Arrêt des conteneurs
