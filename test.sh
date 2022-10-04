@@ -6,6 +6,7 @@
 # 3 : Conteneur non démarré
 # 4 : Keystore non supprimé sur le dashboard
 # 5 : Version du module filebeat incorrecte
+# 11 : Pas d'idempotence
 
 # FONCTIONS
 
