@@ -144,10 +144,10 @@ test_version_module_filebeat()
 			if [ "${suffixe_manifests}" == "2" ]
 			then
 				# La version du module Filebeat doit être 0.1 dans le cas du manifest 2
-				lxc-attach -n "${conteneur}" -- test -d '/opt/filebeat_wazuh_modules/wazuh-filebeat-0.1.tar.gz/wazuh'
+				lxc-attach -n "${conteneur}" -- test -d '/opt/filebeat_wazuh_modules/wazuh-filebeat-0.1/wazuh'
 			else
 				# La version du module Filebeat doit être 0.2 dans les autres cas
-				lxc-attach -n "${conteneur}" -- test -d '/opt/filebeat_wazuh_modules/wazuh-filebeat-0.2.tar.gz/wazuh'
+				lxc-attach -n "${conteneur}" -- test -d '/opt/filebeat_wazuh_modules/wazuh-filebeat-0.2/wazuh'
 			fi
 			if [ "$?" -eq "0" ]
 			then
